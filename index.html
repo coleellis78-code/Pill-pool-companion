@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pool Ball Companion</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1b1b1b;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+      background: #2a2a2a;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: #3fa34d;
+      color: white;
+      border: none;
+      padding: 15px 25px;
+      font-size: 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 15px;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #34863f;
+    }
+
+    .ball {
+      font-size: 60px;
+      margin: 20px 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .message {
+      font-size: 22px;
+      margin-top: 20px;
+    }
+
+    .player-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .player-btn {
+      background: #3fa34d;
+      color: white;
+      border: none;
+      padding: 20px;
+      font-size: 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .player-btn:hover {
+      background: #34863f;
+    }
+
+    .player-count-display {
+      font-size: 20px;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Player Selection Screen -->
+  <div id="playerSelectionScreen">
+    <h1>Pool Ball Picker</h1>
+    <p>How many players are playing?</p>
+    <div class="player-buttons">
+      <button class="player-btn" onclick="selectPlayers(2)">2</button>
+      <button class="player-btn" onclick="selectPlayers(3)">3</button>
+      <button class="player-btn" onclick="selectPlayers(4)">4</button>
+      <button class="player-btn" onclick="selectPlayers(5)">5</button>
+      <button class="player-btn" onclick="selectPlayers(6)">6</button>
+      <button class="player-btn" onclick="selectPlayers(7)">7</button>
+      <button class="player-btn" onclick="selectPlayers(8)">8</button>
+      <button class="player-btn" onclick="selectPlayers(9)">9</button>
+    </div>
+  </div>
+
+  <!-- Start Screen -->
+  <div id="startScreen" class="hidden">
+    <h1>Pool Ball Picker</h1>
+    <p>Tap below to get your secret ball.</p>
+    <div class="player-count-display" id="ballsRemaining"></div>
+    <button onclick="pickBall()">Pick My Ball</button>
+  </div>
+
+  <!-- Reveal Screen -->
+  <div id="revealScreen" class="hidden">
+    <h2>Your Ball Is...</h2>
+    <div class="ball" id="ballDisplay"></div>
+    <button onclick="nextPlayer()">Hide & Pass</button>
+  </div>
+
+  <!-- Pass Screen -->
+  <div id="passScreen" class="hidden">
+    <div class="message">
+      Hand the phone to the next player.
+    </div>
+
+    <button onclick="showStart()">
+      Next Player
+    </button>
+  </div>
+
+  <!-- Finished Screen -->
+  <div id="finishedScreen" class="hidden">
+    <h2>All Balls Assigned!</h2>
+    <p>No more balls left.</p>
+
+    <button onclick="resetGame()">
+      Reset Game
+    </button>
+  </div>
+
+</div>
+
+<script>
+  // Pool balls 1-15
+  let availableBalls = [];
+  let numPlayers = 0;
+  let ballsToPickPerPlayer = 0;
+  let ballsPickedSoFar = 0;
+
+  function selectPlayers(numPlayerSelected) {
+    numPlayers = numPlayerSelected;
+    ballsToPickPerPlayer = numPlayerSelected;
+    ballsPickedSoFar = 0;
+
+    // Initialize available balls
+    availableBalls = [];
+    for (let i = 1; i <= 15; i++) {
+      availableBalls.push(i);
+    }
+
+    // Show start screen
+    hideAll();
+    document.getElementById("startScreen").classList.remove("hidden");
+    updateBallsRemaining();
+  }
+
+  function updateBallsRemaining() {
+    const remaining = ballsToPickPerPlayer - ballsPickedSoFar;
+    document.getElementById("ballsRemaining").innerText = `Balls remaining: ${remaining}`;
+  }
+
+  function pickBall() {
+    // Safety check if no balls left
+    if (availableBalls.length === 0) {
+      hideAll();
+      document.getElementById("finishedScreen").classList.remove("hidden");
+      return;
+    }
+
+    // Pick random index
+    let randomIndex = Math.floor(Math.random() * availableBalls.length);
+
+    // Remove selected ball so it can't repeat
+    let selectedBall = availableBalls.splice(randomIndex, 1)[0];
+
+    // Show selected ball
+    document.getElementById("ballDisplay").innerText = selectedBall;
+
+    ballsPickedSoFar++;
+
+    hideAll();
+    document.getElementById("revealScreen").classList.remove("hidden");
+  }
+
+  function nextPlayer() {
+    hideAll();
+    
+    // Check if we've picked all the balls needed
+    if (ballsPickedSoFar >= ballsToPickPerPlayer) {
+      document.getElementById("finishedScreen").classList.remove("hidden");
+    } else {
+      document.getElementById("passScreen").classList.remove("hidden");
+    }
+  }
+
+  function showStart() {
+    hideAll();
+    updateBallsRemaining();
+    document.getElementById("startScreen").classList.remove("hidden");
+  }
+
+  function resetGame() {
+    hideAll();
+    numPlayers = 0;
+    ballsToPickPerPlayer = 0;
+    ballsPickedSoFar = 0;
+    availableBalls = [];
+    document.getElementById("playerSelectionScreen").classList.remove("hidden");
+  }
+
+  function hideAll() {
+    document.getElementById("playerSelectionScreen").classList.add("hidden");
+    document.getElementById("startScreen").classList.add("hidden");
+    document.getElementById("revealScreen").classList.add("hidden");
+    document.getElementById("passScreen").classList.add("hidden");
+    document.getElementById("finishedScreen").classList.add("hidden");
+  }
+</script>
+
+</body>
+</html>
