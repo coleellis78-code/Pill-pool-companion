@@ -160,16 +160,26 @@
     ballsToPickPerPlayer = numPlayerSelected;
     ballsPickedSoFar = 0;
 
-    // Initialize available balls
+    // Initialize available balls (randomly shuffled)
     availableBalls = [];
     for (let i = 1; i <= 15; i++) {
       availableBalls.push(i);
     }
+    
+    // Shuffle the balls randomly
+    shuffleArray(availableBalls);
 
     // Show start screen
     hideAll();
     document.getElementById("startScreen").classList.remove("hidden");
     updateBallsRemaining();
+  }
+
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
   }
 
   function updateBallsRemaining() {
@@ -185,11 +195,8 @@
       return;
     }
 
-    // Pick random index
-    let randomIndex = Math.floor(Math.random() * availableBalls.length);
-
-    // Remove selected ball so it can't repeat
-    let selectedBall = availableBalls.splice(randomIndex, 1)[0];
+    // Pop the next ball from the shuffled array
+    let selectedBall = availableBalls.shift();
 
     // Show selected ball
     document.getElementById("ballDisplay").innerText = selectedBall;
